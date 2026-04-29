@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+  <title>Banking PRO AI v16</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg1:#07111f; --bg2:#0f172a;
+      --card:rgba(255,255,255,.06); --line:rgba(255,255,255,.08);
+      --text:#fff; --muted:#94a3b8;
+      --input:#1e293b; --inputText:#fff;
+      --primary:#2563eb; --primary2:#1d4ed8;
+      --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --transfer:#a78bfa;
+      --biz:#f59e0b; --biz2:#d97706;
+      --cross:#22d3ee; --cross2:#0891b2;
+    }
+    body.light {
+      --bg1:#eef2ff; --bg2:#fff; --card:#fff; --line:#e5e7eb;
+      --text:#111827; --muted:#64748b; --input:#f1f5f9; --inputText:#111827;
+    }
+    body.modo-negocio { --primary:var(--biz); --primary2:var(--biz2); }
+    body.modo-negocio .header { border-bottom:2px solid rgba(245,158,11,.3); }
+
+    *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body{
+      font-family:Inter,sans-serif;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text); padding:14px 14px 108px; max-width:820px; margin:auto;
+    }
+    .card,.header{
+      background:var(--card); border:1px solid var(--line);
+      border-radius:22px; padding:16px; margin-bottom:12px; backdrop-filter:blur(14px);
+    }
+    .big{font-size:34px;font-weight:800}
+    .small{font-size:12px;color:var(--muted)}
+    .title{font-size:17px;font-weight:800;margin-bottom:10px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .kpi{background:rgba(255,255,255,.04);padding:12px;border-radius:14px}
+    .kpi span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+    .kpi strong{font-size:18px}
+    input,select,button{width:100%;border:none;outline:none;border-radius:14px;font-family:inherit}
+    input,select{padding:14px;background:var(--input);color:var(--inputText);font-weight:600;margin-bottom:10px}
+    button{padding:14px;font-weight:800;cursor:pointer}
+    .primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+    .secondary{background:rgba(255,255,255,.08);color:var(--text)}
+    .danger{background:rgba(239,68,68,.18);color:var(--bad);}
+    .cross-btn{background:linear-gradient(135deg,var(--cross),var(--cross2));color:#fff}
+    .small-btn{padding:8px 12px;font-size:12px;width:auto;background:rgba(255,255,255,.08);color:var(--text);margin-top:8px}
+
+    .ctx-wrap{display:flex;gap:6px;margin-bottom:10px}
+    .ctx-btn{
+      flex:1;padding:10px 6px;font-size:13px;font-weight:700;border-radius:14px;
+      cursor:pointer;text-align:center;border:1px solid transparent;
+      background:rgba(255,255,255,.06);color:var(--muted);transition:.2s;
+    }
+    .ctx-btn.ctx-active{background:rgba(37,99,235,.2);color:var(--primary);border-color:var(--primary)}
+    .ctx-btn.ctx-biz.ctx-active{background:rgba(245,158,11,.2);color:var(--biz);border-color:var(--biz)}
+    .ctx-label{
+      display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:800;
+      margin-left:6px;vertical-align:middle;
+    }
+    .ctx-label.personal{background:rgba(37,99,235,.2);color:var(--primary)}
+    .ctx-label.negocio{background:rgba(245,158,11,.2);color:var(--biz)}
+    .ctx-label.cross{background:rgba(34,211,238,.2);color:var(--cross)}
+
+    .mode-tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+    .mode-tab{
+      padding:10px 6px;font-size:12px;font-weight:700;
+      background:rgba(255,255,255,.06);color:var(--muted);
+      border-radius:12px;cursor:pointer;border:1px solid transparent;text-align:center;
+    }
+    .mode-tab.active{background:rgba(37,99,235,.2);color:var(--primary);border-color:var(--primary)}
+    .mode-tab.cross-active{background:rgba(34,211,238,.2);color:var(--cross);border-color:var(--cross)}
+
+    .form-section{display:none}
+    .form-section.active{display:block}
+
+    .cuenta-card{
+      background:rgba(255,255,255,.04);border:1px solid var(--line);
+      border-radius:16px;padding:14px;
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+    }
+    .cuenta-left{display:flex;align-items:center;gap:10px}
+    .cuenta-icon{
+      width:42px;height:42px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;background:rgba(255,255,255,.08);flex-shrink:0;
+    }
+    .cuenta-name{font-weight:700;font-size:14px}
+    .cuenta-saldo{font-weight:800;font-size:18px}
+    .cuenta-saldo.positive{color:var(--ok)}
+    .cuenta-saldo.negative{color:var(--bad)}
+
+    .dist-bar{height:8px;border-radius:20px;background:rgba(255,255,255,.06);overflow:hidden;display:flex;margin-top:10px}
+    .dist-seg{height:100%;transition:width .4s}
+    .dist-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .dist-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+    .dist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+    .transfer-arrow{text-align:center;font-size:20px;margin:-4px 0 6px;color:var(--transfer)}
+    .cross-arrow{text-align:center;font-size:20px;margin:-4px 0 6px;color:var(--cross)}
+
+    .tab{display:none}
+    .tab.active{display:block}
+    .list{display:grid;gap:10px}
+    .item{background:rgba(255,255,255,.04);padding:12px;border-radius:14px;border-left:4px solid transparent}
+    .ingreso{border-left-color:var(--ok)}
+    .gasto{border-left-color:var(--bad)}
+    .transferencia{border-left-color:var(--transfer)}
+    .traspaso{border-left-color:var(--cross)}
+
+    .alert{padding:10px;border-radius:12px;font-size:13px;margin-top:8px;line-height:1.45}
+    .good{background:rgba(34,197,94,.14);color:var(--ok)}
+    .bad{background:rgba(239,68,68,.14);color:var(--bad)}
+    .mid{background:rgba(245,158,11,.14);color:var(--warn)}
+    .info{background:rgba(34,211,238,.12);color:var(--cross)}
+
+    .progress{height:10px;background:rgba(255,255,255,.08);border-radius:20px;overflow:hidden;margin-top:8px}
+    .bar{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);width:0%;transition:.3s}
+
+    .nav{
+      position:fixed;left:0;right:0;bottom:0;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(5,10,20,.94);backdrop-filter:blur(16px);
+      border-top:1px solid var(--line);max-width:820px;margin:auto;
+    }
+    .nav button{padding:8px 4px;font-size:24px;background:transparent;color:#cbd5e1;line-height:1}
+    .nav button.active{background:rgba(255,255,255,.08);color:#fff;border-radius:14px}
+
+    canvas{margin-top:10px;background:rgba(255,255,255,.03);padding:8px;border-radius:14px}
+
+    .toast{
+      position:fixed;left:50%;bottom:96px;transform:translateX(-50%);
+      background:#111827;color:#fff;padding:12px 16px;border-radius:14px;
+      font-size:13px;font-weight:700;display:none;z-index:999;
+      white-space:nowrap;max-width:90vw;text-align:center;
+    }
+    .eye{font-size:12px;margin-top:10px;cursor:pointer;color:var(--muted)}
+    .fav-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .timeline-day{font-size:12px;color:var(--muted);font-weight:800;margin:10px 0 4px}
+    label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:4px;margin-top:2px}
+
+    .badge{
+      display:inline-block;padding:2px 7px;border-radius:20px;
+      font-size:10px;font-weight:700;
+      background:rgba(167,139,250,.2);color:var(--transfer);
+      margin-left:4px;vertical-align:middle;
+    }
+    .badge.cross-badge{
+      background:rgba(34,211,238,.2);color:var(--cross);
+    }
+
+    .cross-card{
+      background:rgba(34,211,238,.07);
+      border:1px solid rgba(34,211,238,.25);
+      border-radius:18px;padding:14px;margin-bottom:10px;
+    }
+    .cross-card .title{color:var(--cross)}
+
+    .consolidado-card{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius:16px;padding:14px;margin-bottom:12px;
+    }
+    .consolidado-row{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    }
+    .consolidado-ctx{
+      border-radius:14px;padding:12px;
+    }
+    .consolidado-ctx.personal-ctx{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2)}
+    .consolidado-ctx.negocio-ctx{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)}
+
+    .mes-card{
+      background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);
+      border-radius:16px;padding:14px;margin-bottom:10px;
+    }
+    .mes-card-title{
+      font-weight:800;font-size:14px;color:var(--transfer);
+      display:flex;justify-content:space-between;align-items:center;
+      cursor:pointer;
+    }
+    .mes-card-body{display:none;margin-top:10px}
+    .mes-card-body.open{display:block}
+    .mes-resumen{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+    .mes-kpi{background:rgba(255,255,255,.04);padding:10px;border-radius:12px;text-align:center}
+    .mes-kpi span{display:block;font-size:11px;color:var(--muted)}
+    .mes-kpi strong{font-size:15px}
+
+    .cat-chip{
+      display:inline-flex;align-items:center;gap:6px;
+      background:rgba(255,255,255,.07);border:1px solid var(--line);
+      border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600;
+      margin:4px;
+    }
+    .cat-chip button{
+      width:auto;padding:0 4px;background:transparent;
+      color:var(--bad);font-size:14px;line-height:1;
+    }
+    .cat-chips-wrap{display:flex;flex-wrap:wrap;margin-bottom:10px}
+
+    .modal-overlay{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+      z-index:1000;align-items:center;justify-content:center;padding:20px;
+    }
+    .modal-overlay.open{display:flex}
+    .modal{
+      background:#0f172a;border:1px solid var(--line);border-radius:22px;
+      padding:22px;max-width:400px;width:100%;
+    }
+    .modal h3{font-size:18px;font-weight:800;margin-bottom:8px}
+    .modal p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+    .modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    .consolidado-loading{
+      text-align:center;padding:16px;font-size:12px;color:var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div class="small">Banking PRO AI v16</div>
+        <div class="small" id="today"></div>
+      </div>
+      <div id="ctxIndicator" style="font-size:22px">👤</div>
+    </div>
+
+    <div class="ctx-wrap">
+      <div id="ctxPersonal" class="ctx-btn ctx-active" onclick="setContexto('personal')">👤 Personal</div>
+      <div id="ctxNegocio"  class="ctx-btn ctx-biz"   onclick="setContexto('negocio')">🏪 Mi Negocio</div>
+    </div>
+
+    <div class="small" style="margin-top:4px" id="ctxSaldoLabel">Saldo total disponible</div>
+    <div class="big" id="saldoTop">$0</div>
+    <div class="eye" onclick="toggleHide()">👁 Mostrar / ocultar montos</div>
+    <div class="grid3" style="margin-top:12px">
+      <div class="kpi"><span>Pendientes</span><strong id="pendingCount">0</strong></div>
+      <div class="kpi"><span>Sincronizados</span><strong id="syncCount">0</strong></div>
+      <div class="kpi"><span>Racha</span><strong id="streakBox">0</strong></div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section class="tab active" id="tab-home">
+
+    <div class="consolidado-card" id="crossCard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="title" style="margin-bottom:0">📊 Resumen consolidado</div>
+        <button class="small-btn" onclick="refreshConsolidado()" style="font-size:11px">🔄 Actualizar</button>
+      </div>
+      <div id="crossSummary"></div>
+      <div id="crossTraspasos" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <div class="title" id="cuentasTitle">🏦 Mis cuentas</div>
+      <div id="cuentasResumen"></div>
+      <div class="dist-bar" id="distBar"></div>
+      <div class="dist-legend" id="distLegend"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">🎛️ Centro de mando</div>
+      <div id="cockpit"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">➕ Nuevo movimiento <span class="ctx-label" id="movCtxLabel">Personal</span></div>
+      <div class="mode-tabs">
+        <div class="mode-tab active" onclick="setMode('ingreso',this)">💰 Ingreso</div>
+        <div class="mode-tab"        onclick="setMode('gasto',this)">💸 Gasto</div>
+        <div class="mode-tab"        onclick="setMode('transferencia',this)">🔄 Mover</div>
+        <div class="mode-tab"        id="tabTraspaso" onclick="setMode('traspaso',this)">🔀 Traspaso</div>
+      </div>
+
+      <input type="date" id="fecha">
+
+      <div class="form-section active" id="fs-normal">
+        <label>Cuenta</label>
+        <select id="cuentaSel"></select>
+        <label>Categoría</label>
+        <select id="categoria"></select>
+        <input type="text" id="descripcion" placeholder="Descripción">
+        <input type="text" id="montoInput"  placeholder="Monto  ej: 20.000">
+      </div>
+
+      <div class="form-section" id="fs-transfer">
+        <label>Cuenta origen (sale el dinero)</label>
+        <select id="cuentaOrigen"></select>
+        <div class="transfer-arrow">⬇️</div>
+        <label>Cuenta destino (entra el dinero)</label>
+        <select id="cuentaDestino"></select>
+        <input type="text" id="montoTransfer" placeholder="Monto a transferir  ej: 50.000">
+        <input type="text" id="descTransfer"  placeholder="Descripción (opcional)">
+      </div>
+
+      <div class="form-section" id="fs-traspaso">
+        <div class="alert info" style="margin-bottom:12px">
+          💡 Mueve dinero entre tus finanzas <b>personales</b> y tu <b>negocio</b>. Se registra en ambos contextos.
+        </div>
+        <label>Dirección del traspaso</label>
+        <select id="traspasoDireccion">
+          <option value="p2n">👤 Personal → 🏪 Negocio</option>
+          <option value="n2p">🏪 Negocio → 👤 Personal</option>
+        </select>
+        <label>Cuenta origen</label>
+        <select id="traspasoOrigen"></select>
+        <div class="cross-arrow">⬇️</div>
+        <label>Cuenta destino</label>
+        <select id="traspasoDestino"></select>
+        <input type="text" id="montoTrspaso" placeholder="Monto  ej: 100.000">
+        <input type="text" id="descTrspaso"  placeholder="Concepto del traspaso">
+      </div>
+
+      <button class="primary" id="saveBtn" onclick="guardar()">💾 Guardar</button>
+    </div>
+
+    <div class="card">
+      <div class="title">⭐ Favoritos automáticos</div>
+      <div class="fav-grid" id="favList"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">🧠 Coach Financiero</div>
+      <div id="coach"></div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="tab" id="tab-dashboard">
+    <div class="card"><div class="title">🏦 Saldo por cuenta</div><canvas id="chart6"></canvas></div>
+    <div class="card"><div class="title">📊 Gastos por categoría</div><canvas id="chart1"></canvas></div>
+    <div class="card"><div class="title">📈 Ingresos vs Gastos</div><canvas id="chart2"></canvas></div>
+    <div class="card"><div class="title">📉 Tendencia de saldo diario</div><canvas id="chart3"></canvas></div>
+    <div class="card"><div class="title">📆 Gastos por día de la semana</div><canvas id="chart4"></canvas></div>
+    <div class="card"><div class="title">💸 Top fugas (movimientos repetidos)</div><canvas id="chart5"></canvas></div>
+  </section>
+
+  <!-- GOALS -->
+  <section class="tab" id="tab-goals">
+    <div class="card">
+      <div class="title">🎯 Nueva meta <span class="ctx-label" id="goalCtxLabel">Personal</span></div>
+      <input type="text"   id="goalName"  placeholder="Ej: Viaje">
+      <input type="number" id="goalValue" placeholder="Monto objetivo">
+      <button class="primary" onclick="addGoal()">Guardar meta</button>
+    </div>
+    <div class="card">
+      <div class="title">🚀 Mis metas</div>
+      <div id="goalList"></div>
+    </div>
+  </section>
+
+  <!-- MOVEMENTS -->
+  <section class="tab" id="tab-list">
+    <div class="card">
+      <div class="title" id="listTitle">📋 Movimientos del mes actual</div>
+      <div class="list" id="lista"></div>
+    </div>
+    <div class="card" id="historialCard" style="display:none">
+      <div class="title">🗂️ Historial de meses anteriores</div>
+      <div id="historialLista"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="tab" id="tab-settings">
+    <div class="card">
+      <div class="title">⚙️ Tema</div>
+      <button class="secondary" onclick="setTheme('dark')">🌙 Oscuro</button>
+      <br><br>
+      <button class="secondary" onclick="setTheme('light')">☀️ Claro</button>
+    </div>
+
+    <div class="card">
+      <div class="title">📅 Cierre de mes <span class="ctx-label" id="cierreCtxLabel">Personal</span></div>
+      <div class="alert mid" style="margin-bottom:12px">
+        Al cerrar el mes, el saldo actual de cada cuenta se guarda como nuevo saldo base y los movimientos quedan archivados en el historial.
+      </div>
+      <button class="primary" onclick="abrirModalCierre()">🔒 Cerrar mes actual</button>
+    </div>
+
+    <div class="card">
+      <div class="title" id="cuentasAdminTitle">🏦 Gestionar cuentas</div>
+      <div id="cuentasAdmin"></div>
+      <br>
+      <label>Nombre de la nueva cuenta</label>
+      <input type="text" id="newCuentaNombre" placeholder="Ej: Bancolombia">
+      <label>Tipo / ícono</label>
+      <select id="newCuentaIcon">
+        <option value="🏦">🏦 Banco</option>
+        <option value="📱">📱 Nequi / Daviplata</option>
+        <option value="💵">💵 Efectivo</option>
+        <option value="💳">💳 Tarjeta</option>
+        <option value="🐷">🐷 Ahorros</option>
+        <option value="🏪">🏪 Caja negocio</option>
+        <option value="💼">💼 Otro</option>
+      </select>
+      <button class="primary" onclick="addCuenta()">➕ Agregar cuenta</button>
+    </div>
+
+    <div class="card">
+      <div class="title" id="catsAdminTitle">🏷️ Gestionar categorías</div>
+      <div id="catsAdmin"></div>
+      <br>
+      <label>Ícono</label>
+      <input type="text" id="newCatIcon" placeholder="Ej: 🛒" style="width:80px;display:inline-block;margin-right:8px">
+      <label style="margin-top:8px">Nombre de la categoría</label>
+      <input type="text" id="newCatNombre" placeholder="Ej: Supermercado">
+      <label>Aplica a</label>
+      <select id="newCatTipo">
+        <option value="ambos">Ingreso y Gasto</option>
+        <option value="ingreso">Solo Ingreso</option>
+        <option value="gasto">Solo Gasto</option>
+      </select>
+      <button class="primary" onclick="addCategoria()">➕ Agregar categoría</button>
+    </div>
+
+    <div class="card">
+      <div class="title">🧹 Limpiar datos</div>
+      <div class="alert mid" style="margin-bottom:12px">
+        Usa esto solo si el consolidado muestra datos incorrectos. Limpia el caché local de un contexto específico.
+      </div>
+      <button class="secondary" onclick="limpiarCache('personal')" style="margin-bottom:8px">🗑️ Limpiar caché Personal</button>
+      <button class="secondary" onclick="limpiarCache('negocio')">🗑️ Limpiar caché Negocio</button>
+    </div>
+  </section>
+
+  <nav class="nav">
+    <button class="active" onclick="goTab('home',this)">🏠</button>
+    <button onclick="goTab('dashboard',this)">📊</button>
+    <button onclick="goTab('goals',this)">🎯</button>
+    <button onclick="goTab('list',this)">📋</button>
+    <button onclick="goTab('settings',this)">⚙️</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="modalCierre">
+    <div class="modal">
+      <h3>🔒 Cerrar mes</h3>
+      <p>Esto archivará todos los movimientos del mes actual y actualizará el saldo base de cada cuenta con el saldo actual. No podrás revertir esta acción.</p>
+      <div id="modalResumen" style="margin-bottom:14px"></div>
+      <div class="modal-btns">
+        <button class="secondary" onclick="cerrarModal()">Cancelar</button>
+        <button class="primary"   onclick="confirmarCierre()">✔ Confirmar cierre</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ══════════════════════════════════════
+       CONFIG
+    ══════════════════════════════════════ */
+    const API_URL    = "https://script.google.com/macros/s/AKfycbyUpcWZz6q9l3woOpnB90db5LxS8ZjU5EpH_OwZL9DbQo54_NtDoe0zEF7CnCgBbDtT/exec";
+    const ACC_COLORS = ["#2563eb","#22c55e","#f59e0b","#ec4899","#a78bfa","#14b8a6"];
+
+    const CATS_DEFAULT_PERSONAL = [
+      { id:"ingreso",         nombre:"Ingreso",         icon:"💰", tipo:"ingreso" },
+      { id:"comida",          nombre:"Comida",           icon:"🍔", tipo:"gasto"   },
+      { id:"vivienda",        nombre:"Vivienda",         icon:"🏠", tipo:"gasto"   },
+      { id:"transporte",      nombre:"Transporte",       icon:"🚗", tipo:"gasto"   },
+      { id:"servicios",       nombre:"Servicios",        icon:"💡", tipo:"gasto"   },
+      { id:"entretenimiento", nombre:"Entretenimiento",  icon:"🎮", tipo:"gasto"   },
+      { id:"ahorro",          nombre:"Ahorro",           icon:"🏦", tipo:"ambos"   },
+    ];
+
+    const CATS_DEFAULT_NEGOCIO = [
+      { id:"ventas",          nombre:"Ventas",           icon:"💰", tipo:"ingreso" },
+      { id:"servicios_neg",   nombre:"Servicios",        icon:"🛠️", tipo:"ingreso" },
+      { id:"inventario",      nombre:"Inventario",       icon:"📦", tipo:"gasto"   },
+      { id:"nomina",          nombre:"Nómina",           icon:"👷", tipo:"gasto"   },
+      { id:"arriendo_neg",    nombre:"Arriendo",         icon:"🏪", tipo:"gasto"   },
+      { id:"publicidad",      nombre:"Publicidad",       icon:"📣", tipo:"gasto"   },
+      { id:"servicios_pub",   nombre:"Servicios públicos",icon:"💡",tipo:"gasto"   },
+      { id:"proveedores",     nombre:"Proveedores",      icon:"🚚", tipo:"gasto"   },
+      { id:"impuestos",       nombre:"Impuestos",        icon:"🧾", tipo:"gasto"   },
+      { id:"reinversion",     nombre:"Reinversión",      icon:"🔄", tipo:"ambos"   },
+    ];
+
+    const $ = id => document.getElementById(id);
+    const elFecha          = $("fecha");
+    const elDescripcion    = $("descripcion");
+    const elMontoInput     = $("montoInput");
+    const elCategoria      = $("categoria");
+    const elCuentaSel      = $("cuentaSel");
+    const elCuentaOrigen   = $("cuentaOrigen");
+    const elCuentaDestino  = $("cuentaDestino");
+    const elMontoTransfer  = $("montoTransfer");
+    const elDescTransfer   = $("descTransfer");
+    const elSaveBtn        = $("saveBtn");
+    const elSaldoTop       = $("saldoTop");
+    const elToday          = $("today");
+    const elPendingCount   = $("pendingCount");
+    const elSyncCount      = $("syncCount");
+    const elStreakBox      = $("streakBox");
+    const elCockpit        = $("cockpit");
+    const elCoach          = $("coach");
+    const elGoalList       = $("goalList");
+    const elLista          = $("lista");
+    const elFavList        = $("favList");
+    const elGoalName       = $("goalName");
+    const elGoalValue      = $("goalValue");
+    const elToast          = $("toast");
+    const elCuentasResumen = $("cuentasResumen");
+    const elDistBar        = $("distBar");
+    const elDistLegend     = $("distLegend");
+    const elCuentasAdmin   = $("cuentasAdmin");
+    const elCatsAdmin      = $("catsAdmin");
+    const elHistorialLista = $("historialLista");
+    const elHistorialCard  = $("historialCard");
+
+    let contexto   = localStorage.getItem("contexto") || "personal";
+    let data       = [];
+    let pending    = [];
+    let hidden     = localStorage.getItem("hideMoney") === "1";
+    let goals      = [];
+    let streak     = Number(localStorage.getItem("streak") || 0);
+    let modoActual = "ingreso";
+    let historial  = [];
+    let cuentas    = [];
+    let categorias = [];
+    let c1,c2,c3,c4,c5,c6;
+
+    /* ══════════════════════════════════════
+       HELPERS DE KEYS
+    ══════════════════════════════════════ */
+    function keyFor(base) {
+      return contexto === "negocio" ? base + "Negocio" : base;
+    }
+    function keyForCtx(base, ctx) {
+      return ctx === "negocio" ? base + "Negocio" : base;
+    }
+
+    /* ══════════════════════════════════════
+       LIMPIAR CACHÉ
+    ══════════════════════════════════════ */
+    function limpiarCache(ctx) {
+      if (!confirm(`¿Limpiar caché local de ${ctx}? Los datos del servidor se recargarán.`)) return;
+      localStorage.removeItem(keyForCtx("dataCache", ctx));
+      localStorage.removeItem(keyForCtx("pendingQueue", ctx));
+      if (ctx === contexto) {
+        data = []; pending = [];
+        elSyncCount.innerText = 0;
+        elPendingCount.innerText = 0;
+        render();
+        load();
+      }
+      renderCrossCard();
+      toast(`✔ Caché de ${ctx} limpiado`);
+    }
+
+    /* ══════════════════════════════════════
+       CONTEXTO
+    ══════════════════════════════════════ */
+    function cargarCuentasDeContexto() {
+      let defaultPersonal = [
+        { id:"nequi",      nombre:"Nequi",      icon:"📱", saldoInicial:0 },
+        { id:"davivienda", nombre:"Davivienda",  icon:"🏦", saldoInicial:0 },
+        { id:"efectivo",   nombre:"Efectivo",    icon:"💵", saldoInicial:0 }
+      ];
+      let defaultNegocio = [
+        { id:"caja_neg",   nombre:"Caja",        icon:"🏪", saldoInicial:0 },
+        { id:"banco_neg",  nombre:"Banco Neg.",  icon:"🏦", saldoInicial:0 },
+      ];
+      let def = contexto === "negocio" ? defaultNegocio : defaultPersonal;
+      cuentas = JSON.parse(localStorage.getItem(keyFor("cuentas")) || JSON.stringify(def));
+      cuentas = cuentas.map(c => ({ saldoInicial:0, ...c }));
+    }
+
+    function cargarCategoriasDeContexto() {
+      let def = contexto === "negocio" ? CATS_DEFAULT_NEGOCIO : CATS_DEFAULT_PERSONAL;
+      categorias = JSON.parse(localStorage.getItem(keyFor("categorias")) || JSON.stringify(def));
+    }
+
+    function cargarDatosDeContexto() {
+      let cached = localStorage.getItem(keyFor("dataCache"));
+      data    = cached ? JSON.parse(cached) : [];
+      pending = JSON.parse(localStorage.getItem(keyFor("pendingQueue")) || "[]");
+      historial = JSON.parse(localStorage.getItem(keyFor("historialMeses")) || "[]");
+      goals   = JSON.parse(localStorage.getItem(keyFor("goals")) || "[]");
+      elSyncCount.innerText    = data.length;
+      elPendingCount.innerText = pending.length;
+    }
+
+    function setContexto(ctx) {
+      contexto = ctx;
+      localStorage.setItem("contexto", ctx);
+      aplicarEstiloContexto();
+      cargarCuentasDeContexto();
+      cargarCategoriasDeContexto();
+      cargarDatosDeContexto();
+      poblarSelectsCuentas();
+      poblarSelectCategoria(modoActual === "ingreso" ? "ingreso" : "gasto");
+      actualizarLabelsContexto();
+      poblarSelectsTraspaso();
+      render();
+      renderCrossCard();
+      load();
+      toast(ctx === "negocio" ? "🏪 Modo Negocio activado" : "👤 Modo Personal activado");
+    }
+
+    function aplicarEstiloContexto() {
+      let isNeg = contexto === "negocio";
+      document.body.classList.toggle("modo-negocio", isNeg);
+      $("ctxPersonal").classList.toggle("ctx-active", !isNeg);
+      $("ctxNegocio").classList.toggle("ctx-active", isNeg);
+      $("ctxIndicator").innerText = isNeg ? "🏪" : "👤";
+    }
+
+    function actualizarLabelsContexto() {
+      let isNeg = contexto === "negocio";
+      let lbl   = isNeg ? "negocio" : "personal";
+      let txt   = isNeg ? "Negocio" : "Personal";
+      let icon  = isNeg ? "🏪" : "👤";
+
+      ["movCtxLabel","goalCtxLabel","cierreCtxLabel"].forEach(id => {
+        let el = $(id);
+        if (!el) return;
+        el.className = "ctx-label " + lbl;
+        el.innerText = txt;
+      });
+
+      $("cuentasTitle").innerHTML    = (isNeg ? "🏪" : "🏦") + " Mis cuentas " + icon;
+      $("cuentasAdminTitle").innerHTML = (isNeg ? "🏪" : "🏦") + " Cuentas del " + txt;
+      $("catsAdminTitle").innerHTML  = "🏷️ Categorías del " + txt;
+      $("listTitle").innerHTML       = "📋 " + txt + " · Movimientos del mes";
+      $("ctxSaldoLabel").innerText   = isNeg ? "Capital disponible del negocio" : "Saldo total disponible";
+
+      let tabT = $("tabTraspaso");
+      if (tabT) tabT.textContent = isNeg ? "🔀 → Personal" : "🔀 → Negocio";
+    }
+
+    /* ══════════════════════════════════════
+       CONSOLIDADO — LEE DEL SERVIDOR
+       Cada contexto tiene su propia URL con ?ctx=
+    ══════════════════════════════════════ */
+
+    // Carga datos frescos del servidor para un contexto específico
+    // sin tocar las variables globales del contexto activo
+    async function fetchCtxData(ctx) {
+      try {
+        let r = await fetch(API_URL + "?t=" + Date.now() + "&ctx=" + ctx);
+        let arr = await r.json();
+        if (!Array.isArray(arr)) arr = [];
+        // Actualizar caché local de ese contexto
+        localStorage.setItem(keyForCtx("dataCache", ctx), JSON.stringify(arr));
+        return arr;
+      } catch(e) {
+        // Fallback al caché local si no hay red
+        let cached = localStorage.getItem(keyForCtx("dataCache", ctx));
+        return cached ? JSON.parse(cached) : [];
+      }
+    }
+
+    // Calcula saldos/ingresos/gastos a partir de un array de movimientos y cuentas
+    function calcCtxFromArray(arr, pend, cuentasCtx) {
+      let saldos = {};
+      cuentasCtx.forEach(c => { saldos[c.id] = Number(c.saldoInicial) || 0; });
+
+      [...arr, ...pend].forEach(x => {
+        let m = Number(x.Monto) || 0;
+        if (x.Tipo === "Transferencia") {
+          if (saldos[x.CuentaOrigen]  !== undefined) saldos[x.CuentaOrigen]  -= m;
+          if (saldos[x.CuentaDestino] !== undefined) saldos[x.CuentaDestino] += m;
+        } else if (x.Tipo === "TraspasoSalida") {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] !== undefined) saldos[cid] -= m;
+        } else if (x.Tipo === "TraspasoEntrada") {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] !== undefined) saldos[cid] += m;
+        } else {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] === undefined) saldos[cid] = 0;
+          if (x.Tipo === "Ingreso") saldos[cid] += m;
+          else saldos[cid] -= m;
+        }
+      });
+
+      let todos = [...arr, ...pend];
+      let ing = todos.reduce((a,x) => x.Tipo==="Ingreso"  ? a+Number(x.Monto||0):a, 0);
+      let gas = todos.reduce((a,x) => x.Tipo==="Gasto"    ? a+Number(x.Monto||0):a, 0);
+      let sal = Object.values(saldos).reduce((a,b)=>a+b,0);
+      let traspasoEntradas = todos.filter(x=>x.Tipo==="TraspasoEntrada").reduce((a,x)=>a+Number(x.Monto||0),0);
+      let traspasoSalidas  = todos.filter(x=>x.Tipo==="TraspasoSalida").reduce((a,x)=>a+Number(x.Monto||0),0);
+
+      return { ing, gas, sal, saldos, traspasoEntradas, traspasoSalidas };
+    }
+
+    function getCuentasCtx(ctx) {
+      let defaultPersonal = [
+        { id:"nequi",      nombre:"Nequi",      icon:"📱", saldoInicial:0 },
+        { id:"davivienda", nombre:"Davivienda",  icon:"🏦", saldoInicial:0 },
+        { id:"efectivo",   nombre:"Efectivo",    icon:"💵", saldoInicial:0 }
+      ];
+      let defaultNegocio = [
+        { id:"caja_neg",   nombre:"Caja",        icon:"🏪", saldoInicial:0 },
+        { id:"banco_neg",  nombre:"Banco Neg.",  icon:"🏦", saldoInicial:0 },
+      ];
+      let def = ctx === "negocio" ? defaultNegocio : defaultPersonal;
+      let stored = JSON.parse(localStorage.getItem(keyForCtx("cuentas", ctx)) || JSON.stringify(def));
+      return stored.map(c => ({ saldoInicial:0, ...c }));
+    }
+
+    async function renderCrossCard() {
+      let cross   = $("crossCard");
+      let summary = $("crossSummary");
+      let traspos = $("crossTraspasos");
+
+      // Mostrar estado de carga
+      cross.style.display = "block";
+      summary.innerHTML = `<div class="consolidado-loading">⏳ Cargando datos...</div>`;
+      traspos.innerHTML  = "";
+
+      // Obtener datos frescos de AMBOS contextos del servidor
+      let [arrP, arrN] = await Promise.all([
+        fetchCtxData("personal"),
+        fetchCtxData("negocio")
+      ]);
+
+      let pendP = JSON.parse(localStorage.getItem("pendingQueue")         || "[]");
+      let pendN = JSON.parse(localStorage.getItem("pendingQueueNegocio")  || "[]");
+
+      let cuentasP = getCuentasCtx("personal");
+      let cuentasN = getCuentasCtx("negocio");
+
+      let p = calcCtxFromArray(arrP, pendP, cuentasP);
+      let n = calcCtxFromArray(arrN, pendN, cuentasN);
+
+      // Si no hay absolutamente nada, ocultar
+      if (!p.ing && !p.gas && !n.ing && !n.gas && !p.sal && !n.sal) {
+        cross.style.display = "none"; return;
+      }
+
+      let totalSal = p.sal + n.sal;
+
+      summary.innerHTML = `
+        <div class="consolidado-row">
+          <div class="consolidado-ctx personal-ctx">
+            <div style="font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px">👤 Personal</div>
+            <div style="font-size:22px;font-weight:800;color:${p.sal>=0?"var(--ok)":"var(--bad)"}">${money2(p.sal)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">disponible</div>
+            <div style="font-size:11px;margin-top:6px">
+              <span style="color:var(--ok)">+${money2(p.ing)}</span>
+              <span style="color:var(--muted);margin:0 4px">·</span>
+              <span style="color:var(--bad)">-${money2(p.gas)}</span>
+            </div>
+          </div>
+          <div class="consolidado-ctx negocio-ctx">
+            <div style="font-size:12px;font-weight:800;color:var(--biz);margin-bottom:8px">🏪 Negocio</div>
+            <div style="font-size:22px;font-weight:800;color:${n.sal>=0?"var(--ok)":"var(--bad)"}">${money2(n.sal)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">capital</div>
+            <div style="font-size:11px;margin-top:6px">
+              <span style="color:var(--ok)">+${money2(n.ing)}</span>
+              <span style="color:var(--muted);margin:0 4px">·</span>
+              <span style="color:var(--bad)">-${money2(n.gas)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="kpi" style="margin-top:10px;border:1px solid rgba(34,211,238,.2);background:rgba(34,211,238,.07)">
+          <span style="color:var(--cross)">💼 Total consolidado</span>
+          <strong style="color:${totalSal>=0?"var(--ok)":"var(--bad)"}">${money2(totalSal)}</strong>
+        </div>`;
+
+      let tP = p.traspasoEntradas - p.traspasoSalidas;
+      let tN = n.traspasoEntradas - n.traspasoSalidas;
+      if (p.traspasoEntradas || p.traspasoSalidas || n.traspasoEntradas || n.traspasoSalidas) {
+        traspos.innerHTML = `
+          <div style="font-size:11px;color:var(--cross);font-weight:700;margin-bottom:4px">🔀 Traspasos entre contextos este mes</div>
+          <div style="font-size:11px;color:var(--muted)">
+            Personal: ${tP>=0?"+":""}${money2(tP)} neto &nbsp;·&nbsp; Negocio: ${tN>=0?"+":""}${money2(tN)} neto
+          </div>`;
+      }
+    }
+
+    function refreshConsolidado() {
+      renderCrossCard();
+      toast("🔄 Actualizando consolidado...");
+    }
+
+    function money2(n) {
+      return "$" + Number(n).toLocaleString("es-CO");
+    }
+
+    /* ══════════════════════════════════════
+       CATEGORÍAS
+    ══════════════════════════════════════ */
+    function saveCategorias() { localStorage.setItem(keyFor("categorias"), JSON.stringify(categorias)); }
+    function getCatsDefault() { return contexto === "negocio" ? CATS_DEFAULT_NEGOCIO : CATS_DEFAULT_PERSONAL; }
+
+    function poblarSelectCategoria(modo) {
+      elCategoria.innerHTML = "";
+      categorias.filter(c => c.tipo==="ambos" || c.tipo===modo).forEach(c => {
+        let opt = document.createElement("option");
+        opt.value = opt.textContent = c.icon + " " + c.nombre;
+        elCategoria.appendChild(opt);
+      });
+    }
+
+    function addCategoria() {
+      let icon   = $("newCatIcon").value.trim() || "📌";
+      let nombre = $("newCatNombre").value.trim();
+      let tipo   = $("newCatTipo").value;
+      if (!nombre) { toast("Escribe el nombre de la categoría"); return; }
+      let id = nombre.toLowerCase().replace(/\s+/g,"_") + "_" + Date.now();
+      categorias.push({ id, nombre, icon, tipo });
+      saveCategorias();
+      $("newCatIcon").value = $("newCatNombre").value = "";
+      renderCatsAdmin();
+      poblarSelectCategoria(modoActual === "ingreso" ? "ingreso" : "gasto");
+      toast("✔ Categoría agregada");
+    }
+
+    function delCategoria(id) {
+      if (getCatsDefault().find(c => c.id === id)) { toast("No puedes eliminar categorías por defecto"); return; }
+      categorias = categorias.filter(c => c.id !== id);
+      saveCategorias();
+      renderCatsAdmin();
+      poblarSelectCategoria(modoActual === "ingreso" ? "ingreso" : "gasto");
+      toast("Categoría eliminada");
+    }
+
+    function renderCatsAdmin() {
+      elCatsAdmin.innerHTML = `<div class="cat-chips-wrap">` +
+        categorias.map(c => `
+          <div class="cat-chip">
+            ${c.icon} ${c.nombre}
+            <span style="font-size:10px;color:var(--muted);margin-left:2px">(${c.tipo})</span>
+            <button onclick="delCategoria('${c.id}')">✕</button>
+          </div>`).join("") +
+        `</div>`;
+    }
+
+    /* ══════════════════════════════════════
+       CUENTAS
+    ══════════════════════════════════════ */
+    function poblarSelectsCuentas() {
+      [elCuentaSel, elCuentaOrigen, elCuentaDestino].forEach(sel => {
+        sel.innerHTML = "";
+        cuentas.forEach(c => {
+          let opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.icon + " " + c.nombre;
+          sel.appendChild(opt);
+        });
+      });
+      if (elCuentaDestino.options.length > 1) elCuentaDestino.selectedIndex = 1;
+    }
+
+    function poblarSelectsTraspaso() {
+      let selOrigen  = $("traspasoOrigen");
+      let selDestino = $("traspasoDestino");
+      let selDir     = $("traspasoDireccion");
+      if (!selOrigen || !selDestino || !selDir) return;
+
+      let dir = selDir.value;
+      let ctxOrig  = dir === "p2n" ? "personal" : "negocio";
+      let ctxDest  = dir === "p2n" ? "negocio"  : "personal";
+
+      let cuentasOrig = getCuentasCtx(ctxOrig);
+      let cuentasDest = getCuentasCtx(ctxDest);
+
+      selOrigen.innerHTML = "";
+      cuentasOrig.forEach(c => {
+        let opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.icon + " " + c.nombre;
+        selOrigen.appendChild(opt);
+      });
+
+      selDestino.innerHTML = "";
+      cuentasDest.forEach(c => {
+        let opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.icon + " " + c.nombre;
+        selDestino.appendChild(opt);
+      });
+    }
+
+    function addCuenta() {
+      let nombre = $("newCuentaNombre").value.trim();
+      let icon   = $("newCuentaIcon").value;
+      if (!nombre) { toast("Escribe el nombre de la cuenta"); return; }
+      let id = nombre.toLowerCase().replace(/\s+/g,"_") + "_" + Date.now();
+      cuentas.push({ id, nombre, icon, saldoInicial: 0 });
+      saveCuentas();
+      $("newCuentaNombre").value = "";
+      poblarSelectsCuentas();
+      render();
+      toast("✔ Cuenta agregada");
+    }
+
+    function delCuenta(id) {
+      if (!confirm("¿Eliminar esta cuenta?")) return;
+      cuentas = cuentas.filter(c => c.id !== id);
+      saveCuentas();
+      poblarSelectsCuentas();
+      render();
+      toast("Cuenta eliminada");
+    }
+
+    function saveCuentas() { localStorage.setItem(keyFor("cuentas"), JSON.stringify(cuentas)); }
+
+    function renderCuentasAdmin() {
+      elCuentasAdmin.innerHTML = "";
+      if (!cuentas.length) { elCuentasAdmin.innerHTML = `<div class="alert mid">No hay cuentas aún.</div>`; return; }
+      cuentas.forEach(c => {
+        elCuentasAdmin.innerHTML += `
+          <div class="cuenta-card" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+              <div class="cuenta-left">
+                <div class="cuenta-icon">${c.icon}</div>
+                <div class="cuenta-name">${c.nombre}</div>
+              </div>
+              <button class="small-btn" onclick="delCuenta('${c.id}')">🗑️</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    /* ══════════════════════════════════════
+       SALDOS
+    ══════════════════════════════════════ */
+    function calcSaldosCuentas() {
+      let saldos = {};
+      cuentas.forEach(c => { saldos[c.id] = Number(c.saldoInicial) || 0; });
+      [...data, ...pending].forEach(x => {
+        let m = Number(x.Monto) || 0;
+        if (x.Tipo === "Transferencia") {
+          if (saldos[x.CuentaOrigen]  !== undefined) saldos[x.CuentaOrigen]  -= m;
+          if (saldos[x.CuentaDestino] !== undefined) saldos[x.CuentaDestino] += m;
+        } else if (x.Tipo === "TraspasoSalida") {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] !== undefined) saldos[cid] -= m;
+        } else if (x.Tipo === "TraspasoEntrada") {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] !== undefined) saldos[cid] += m;
+        } else {
+          let cid = x.Cuenta || "";
+          if (saldos[cid] === undefined) saldos[cid] = 0;
+          if (x.Tipo === "Ingreso") saldos[cid] += m;
+          else saldos[cid] -= m;
+        }
+      });
+      return saldos;
+    }
+
+    /* ══════════════════════════════════════
+       CIERRE DE MES
+    ══════════════════════════════════════ */
+    function abrirModalCierre() {
+      let saldos = calcSaldosCuentas();
+      let ing = data.reduce((a,x) => x.Tipo==="Ingreso" ? a+Number(x.Monto||0):a, 0);
+      let gas = data.reduce((a,x) => x.Tipo==="Gasto"   ? a+Number(x.Monto||0):a, 0);
+      let resumenHTML = `
+        <div class="mes-resumen">
+          <div class="mes-kpi"><span>Ingresos</span><strong style="color:var(--ok)">${money(ing)}</strong></div>
+          <div class="mes-kpi"><span>Gastos</span><strong style="color:var(--bad)">${money(gas)}</strong></div>
+          <div class="mes-kpi"><span>Balance</span><strong>${money(ing-gas)}</strong></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Saldos que quedarán como base:</div>`;
+      cuentas.forEach(c => {
+        resumenHTML += `<div style="font-size:13px;font-weight:700;margin-bottom:4px">${c.icon} ${c.nombre}: ${money(saldos[c.id]||0)}</div>`;
+      });
+      $("modalResumen").innerHTML = resumenHTML;
+      $("modalCierre").classList.add("open");
+    }
+
+    function cerrarModal() { $("modalCierre").classList.remove("open"); }
+
+    function confirmarCierre() {
+      let saldos = calcSaldosCuentas();
+      let ing = data.reduce((a,x) => x.Tipo==="Ingreso" ? a+Number(x.Monto||0):a, 0);
+      let gas = data.reduce((a,x) => x.Tipo==="Gasto"   ? a+Number(x.Monto||0):a, 0);
+      let label = new Date().toLocaleDateString("es-CO",{ month:"long", year:"numeric" });
+
+      historial.unshift({ label, ing, gas, saldosCierre:{...saldos}, movimientos:[...data] });
+      localStorage.setItem(keyFor("historialMeses"), JSON.stringify(historial));
+
+      cuentas = cuentas.map(c => ({ ...c, saldoInicial: saldos[c.id] || 0 }));
+      saveCuentas();
+
+      data = []; pending = [];
+      localStorage.setItem(keyFor("pendingQueue"), JSON.stringify([]));
+      localStorage.setItem(keyFor("dataCache"),    JSON.stringify([]));
+      elPendingCount.innerText = 0;
+      elSyncCount.innerText    = 0;
+
+      cerrarModal();
+      render();
+      renderHistorial();
+      renderCrossCard();
+      toast("✔ Mes cerrado correctamente");
+    }
+
+    /* ══════════════════════════════════════
+       HISTORIAL
+    ══════════════════════════════════════ */
+    function renderHistorial() {
+      if (!historial.length) { elHistorialCard.style.display="none"; return; }
+      elHistorialCard.style.display = "block";
+      elHistorialLista.innerHTML = "";
+      historial.forEach((mes, idx) => {
+        let movHTML = "";
+        if (mes.movimientos && mes.movimientos.length) {
+          let sorted = [...mes.movimientos].sort((a,b) => new Date(b.Fecha)-new Date(a.Fecha));
+          let lastDay = "";
+          sorted.forEach(x => {
+            let m = Number(x.Monto)||0;
+            let cls = x.Tipo==="Ingreso" ? "ingreso" : x.Tipo==="Transferencia" ? "transferencia" : x.Tipo==="TraspasoSalida"||x.Tipo==="TraspasoEntrada" ? "traspaso" : "gasto";
+            if (x.Fecha !== lastDay) { movHTML += `<div class="timeline-day">${labelDay(x.Fecha)}</div>`; lastDay=x.Fecha; }
+            movHTML += `<div class="item ${cls}"><div>${x.Categoría||""} - ${x.Descripción||""}</div><div class="price">${money(m)}</div></div>`;
+          });
+        } else { movHTML = `<div class="small">Sin movimientos registrados.</div>`; }
+
+        let saldosHTML = "";
+        if (mes.saldosCierre) {
+          saldosHTML = Object.entries(mes.saldosCierre).map(([cid,s]) => {
+            let c = cuentas.find(x => x.id===cid);
+            let lbl = c ? c.icon+" "+c.nombre : cid;
+            return `<span style="font-size:12px;color:var(--muted);margin-right:10px">${lbl}: <b style="color:var(--text)">${money(s)}</b></span>`;
+          }).join("");
+        }
+
+        elHistorialLista.innerHTML += `
+          <div class="mes-card">
+            <div class="mes-card-title" onclick="toggleMes(${idx})">
+              <span>📅 ${mes.label}</span>
+              <span style="font-size:18px" id="mesArrow${idx}">▶</span>
+            </div>
+            <div class="mes-card-body" id="mesBody${idx}">
+              <div class="mes-resumen">
+                <div class="mes-kpi"><span>Ingresos</span><strong style="color:var(--ok)">${money(mes.ing)}</strong></div>
+                <div class="mes-kpi"><span>Gastos</span><strong style="color:var(--bad)">${money(mes.gas)}</strong></div>
+                <div class="mes-kpi"><span>Balance</span><strong>${money(mes.ing-mes.gas)}</strong></div>
+              </div>
+              <div style="margin-bottom:8px">${saldosHTML}</div>
+              <div class="list">${movHTML}</div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function toggleMes(idx) {
+      let body = $("mesBody"+idx), arrow = $("mesArrow"+idx);
+      let open = body.classList.toggle("open");
+      arrow.textContent = open ? "▼" : "▶";
+    }
+
+    /* ══════════════════════════════════════
+       MODO FORMULARIO
+    ══════════════════════════════════════ */
+    function setMode(mode, btn) {
+      modoActual = mode;
+      document.querySelectorAll(".mode-tab").forEach(t => {
+        t.classList.remove("active","cross-active");
+      });
+      if (mode === "traspaso") btn.classList.add("cross-active");
+      else btn.classList.add("active");
+
+      document.querySelectorAll(".form-section").forEach(s => s.classList.remove("active"));
+      if (mode === "transferencia") {
+        $("fs-transfer").classList.add("active");
+      } else if (mode === "traspaso") {
+        $("fs-traspaso").classList.add("active");
+        poblarSelectsTraspaso();
+      } else {
+        $("fs-normal").classList.add("active");
+        poblarSelectCategoria(mode === "ingreso" ? "ingreso" : "gasto");
+      }
+
+      elSaveBtn.className = mode === "traspaso" ? "cross-btn" : "primary";
+      elSaveBtn.innerText = mode === "traspaso" ? "🔀 Registrar traspaso" : "💾 Guardar";
+    }
+
+    /* ══════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════ */
+    function toast(msg) {
+      elToast.innerText = msg;
+      elToast.style.display = "block";
+      setTimeout(() => elToast.style.display="none", 2400);
+    }
+
+    function goTab(tab, btn) {
+      document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+      $("tab-"+tab).classList.add("active");
+      document.querySelectorAll(".nav button").forEach(x => x.classList.remove("active"));
+      btn.classList.add("active");
+      if (tab === "list")      renderHistorial();
+      if (tab === "settings")  { renderCuentasAdmin(); renderCatsAdmin(); }
+      if (tab === "dashboard") render();
+    }
+
+    function money(n) {
+      if (hidden) return "••••••";
+      return "$" + Number(n).toLocaleString("es-CO");
+    }
+
+    function toggleHide() {
+      hidden = !hidden;
+      localStorage.setItem("hideMoney", hidden ? "1" : "0");
+      render(); renderCrossCard();
+    }
+
+    function setTheme(mode) {
+      document.body.classList.toggle("light", mode === "light");
+      toast("Tema actualizado");
+    }
+
+    function parseMonto(str) {
+      return Number(String(str).replace(/\./g,"").replace(",",".")) || 0;
+    }
+
+    function labelDay(f) {
+      let d = new Date(f+"T00:00:00"), now = new Date(), ayer = new Date();
+      ayer.setDate(now.getDate()-1);
+      const iso = d => d.toISOString().slice(0,10);
+      if (f === iso(now))  return "HOY";
+      if (f === iso(ayer)) return "AYER";
+      return d.toLocaleDateString("es-CO",{ day:"numeric", month:"short" });
+    }
+
+    /* ══════════════════════════════════════
+       LOAD
+    ══════════════════════════════════════ */
+    async function load() {
+      let cached = localStorage.getItem(keyFor("dataCache"));
+      if (cached) {
+        data = JSON.parse(cached);
+        elSyncCount.innerText = data.length;
+        render();
+      }
+      try {
+        let r = await fetch(API_URL + "?t=" + Date.now() + "&ctx=" + contexto);
+        let fresh = await r.json();
+        if (!Array.isArray(fresh)) return;
+        if (JSON.stringify(fresh) !== JSON.stringify(data)) {
+          data = fresh;
+          localStorage.setItem(keyFor("dataCache"), JSON.stringify(data));
+          elSyncCount.innerText = data.length;
+          render();
+          renderCrossCard();
+        }
+      } catch(e) { console.error("Error cargando datos:", e); }
+    }
+
+    /* ══════════════════════════════════════
+       GUARDAR
+    ══════════════════════════════════════ */
+    async function guardar() {
+      if (modoActual === "traspaso") {
+        await guardarTraspaso(); return;
+      }
+
+      let datos;
+      let saldos = calcSaldosCuentas();
+
+      if (modoActual === "transferencia") {
+        let m = parseMonto(elMontoTransfer.value);
+        if (m <= 0) { toast("Ingresa un monto válido"); return; }
+        if (elCuentaOrigen.value === elCuentaDestino.value) { toast("Origen y destino deben ser distintos"); return; }
+
+        let saldoOrigen = saldos[elCuentaOrigen.value] || 0;
+        if (m > saldoOrigen) {
+          let cO = cuentas.find(c => c.id === elCuentaOrigen.value);
+          toast(`❌ Saldo insuficiente en ${cO ? cO.icon+" "+cO.nombre : elCuentaOrigen.value}. Disponible: ${money(saldoOrigen)}`);
+          return;
+        }
+
+        datos = {
+          Fecha: elFecha.value, Tipo:"Transferencia",
+          CuentaOrigen: elCuentaOrigen.value, CuentaDestino: elCuentaDestino.value,
+          Descripción: elDescTransfer.value.trim() || "Transferencia entre cuentas",
+          Monto: m, Categoría:"🔄 Transferencia", Contexto: contexto
+        };
+      } else {
+        let m = parseMonto(elMontoInput.value);
+        if (!elDescripcion.value.trim() || m <= 0) { toast("Completa los datos"); return; }
+
+        if (modoActual === "gasto") {
+          let saldoCuenta = saldos[elCuentaSel.value] || 0;
+          if (m > saldoCuenta) {
+            let c = cuentas.find(c => c.id === elCuentaSel.value);
+            toast(`❌ Fondos insuficientes en ${c ? c.icon+" "+c.nombre : elCuentaSel.value}. Disponible: ${money(saldoCuenta)}`);
+            return;
+          }
+        }
+
+        datos = {
+          Fecha: elFecha.value,
+          Tipo: modoActual === "ingreso" ? "Ingreso" : "Gasto",
+          Cuenta: elCuentaSel.value, Categoría: elCategoria.value,
+          Descripción: elDescripcion.value.trim(), Monto: m, Contexto: contexto
+        };
+      }
+
+      elSaveBtn.disabled  = true;
+      elSaveBtn.innerText = "Guardando...";
+
+      if (!navigator.onLine) {
+        pending.push(datos);
+        localStorage.setItem(keyFor("pendingQueue"), JSON.stringify(pending));
+        elPendingCount.innerText = pending.length;
+        doneSave(); toast("☁ Guardado offline"); return;
+      }
+
+      try {
+        await fetch(API_URL, {
+          method:"POST",
+          headers:{ "Content-Type":"text/plain;charset=utf-8" },
+          body: JSON.stringify(datos)
+        });
+        datos.ID = "local_" + Date.now();
+        data.push(datos);
+        localStorage.setItem(keyFor("dataCache"), JSON.stringify(data));
+        elSyncCount.innerText = data.length;
+        render();
+        renderCrossCard();
+        toast("✔ Guardado");
+        setTimeout(load, 3000);
+      } catch(e) {
+        pending.push(datos);
+        localStorage.setItem(keyFor("pendingQueue"), JSON.stringify(pending));
+        elPendingCount.innerText = pending.length;
+        toast("☁ Guardado offline");
+      }
+
+      doneSave();
+    }
+
+    /* ── GUARDAR TRASPASO ENTRE CONTEXTOS ── */
+    async function guardarTraspaso() {
+      let m = parseMonto($("montoTrspaso").value);
+      let desc = $("descTrspaso").value.trim() || "Traspaso entre contextos";
+      let dir  = $("traspasoDireccion").value;
+      let cuentaOrigenId  = $("traspasoOrigen").value;
+      let cuentaDestinoId = $("traspasoDestino").value;
+      let fecha = elFecha.value;
+
+      if (m <= 0) { toast("Ingresa un monto válido"); return; }
+
+      let ctxOrig = dir === "p2n" ? "personal" : "negocio";
+      let ctxDest = dir === "p2n" ? "negocio"  : "personal";
+
+      let cuentasOrig = getCuentasCtx(ctxOrig);
+      let dataOrig    = JSON.parse(localStorage.getItem(keyForCtx("dataCache", ctxOrig)) || "[]");
+      let pendingOrig = JSON.parse(localStorage.getItem(keyForCtx("pendingQueue", ctxOrig)) || "[]");
+
+      let saldosOrig = {};
+      cuentasOrig.forEach(c => { saldosOrig[c.id] = Number(c.saldoInicial)||0; });
+      [...dataOrig, ...pendingOrig].forEach(x => {
+        let mx = Number(x.Monto)||0;
+        if (x.Tipo==="Transferencia") {
+          if (saldosOrig[x.CuentaOrigen]!==undefined) saldosOrig[x.CuentaOrigen]-=mx;
+          if (saldosOrig[x.CuentaDestino]!==undefined) saldosOrig[x.CuentaDestino]+=mx;
+        } else if (x.Tipo==="TraspasoSalida") {
+          if (saldosOrig[x.Cuenta]!==undefined) saldosOrig[x.Cuenta]-=mx;
+        } else if (x.Tipo==="TraspasoEntrada") {
+          if (saldosOrig[x.Cuenta]!==undefined) saldosOrig[x.Cuenta]+=mx;
+        } else {
+          let cid=x.Cuenta||"";
+          if (saldosOrig[cid]===undefined) saldosOrig[cid]=0;
+          if (x.Tipo==="Ingreso") saldosOrig[cid]+=mx; else saldosOrig[cid]-=mx;
+        }
+      });
+
+      let saldoDisp = saldosOrig[cuentaOrigenId] || 0;
+      if (m > saldoDisp) {
+        let cO = cuentasOrig.find(c => c.id === cuentaOrigenId);
+        let ctxLabel = ctxOrig === "negocio" ? "🏪 Negocio" : "👤 Personal";
+        toast(`❌ Saldo insuficiente en ${ctxLabel} · ${cO ? cO.icon+" "+cO.nombre : cuentaOrigenId}. Disponible: $${Number(saldoDisp).toLocaleString("es-CO")}`);
+        return;
+      }
+
+      let ref = Date.now();
+      let regOrigen = {
+        ID: "trspaso_out_" + ref,
+        Fecha: fecha,
+        Tipo: "TraspasoSalida",
+        Cuenta: cuentaOrigenId,
+        Categoría: "🔀 Traspaso",
+        Descripción: desc + " → " + (ctxDest === "negocio" ? "🏪 Negocio" : "👤 Personal"),
+        Monto: m,
+        Contexto: ctxOrig,
+        TraspasoRef: ref
+      };
+
+      let regDestino = {
+        ID: "trspaso_in_" + ref,
+        Fecha: fecha,
+        Tipo: "TraspasoEntrada",
+        Cuenta: cuentaDestinoId,
+        Categoría: "🔀 Traspaso",
+        Descripción: desc + " ← " + (ctxOrig === "negocio" ? "🏪 Negocio" : "👤 Personal"),
+        Monto: m,
+        Contexto: ctxDest,
+        TraspasoRef: ref
+      };
+
+      dataOrig.push(regOrigen);
+      localStorage.setItem(keyForCtx("dataCache", ctxOrig), JSON.stringify(dataOrig));
+
+      let dataDest = JSON.parse(localStorage.getItem(keyForCtx("dataCache", ctxDest)) || "[]");
+      dataDest.push(regDestino);
+      localStorage.setItem(keyForCtx("dataCache", ctxDest), JSON.stringify(dataDest));
+
+      if (contexto === ctxOrig) {
+        data = dataOrig;
+        elSyncCount.innerText = data.length;
+      } else if (contexto === ctxDest) {
+        data = dataDest;
+        elSyncCount.innerText = data.length;
+      }
+
+      $("montoTrspaso").value = $("descTrspaso").value = "";
+      render();
+      renderCrossCard();
+      updateStreak();
+
+      let dirLabel = dir === "p2n" ? "👤 Personal → 🏪 Negocio" : "🏪 Negocio → 👤 Personal";
+      toast(`✔ Traspaso registrado: ${dirLabel} $${Number(m).toLocaleString("es-CO")}`);
+
+      if (navigator.onLine) {
+        try {
+          await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(regOrigen) });
+          await fetch(API_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(regDestino) });
+        } catch(e) {
+          let pendDest = JSON.parse(localStorage.getItem(keyForCtx("pendingQueue", ctxDest)) || "[]");
+          pendDest.push(regDestino);
+          localStorage.setItem(keyForCtx("pendingQueue", ctxDest), JSON.stringify(pendDest));
+        }
+      }
+    }
+
+    function doneSave() {
+      elDescripcion.value = elMontoInput.value = elMontoTransfer.value = elDescTransfer.value = "";
+      elSaveBtn.disabled  = false;
+      elSaveBtn.innerText = modoActual === "traspaso" ? "🔀 Registrar traspaso" : "💾 Guardar";
+      updateStreak();
+    }
+
+    /* ══════════════════════════════════════
+       FAVORITOS
+    ══════════════════════════════════════ */
+    function usarFavorito(cat, des, montoVal, cuentaId) {
+      setMode("gasto", document.querySelectorAll(".mode-tab")[1]);
+      elCategoria.value   = cat;
+      elDescripcion.value = des;
+      elMontoInput.value  = Number(montoVal).toLocaleString("es-CO");
+      if (cuentaId) elCuentaSel.value = cuentaId;
+      toast("Favorito cargado");
+    }
+
+    /* ══════════════════════════════════════
+       STREAK
+    ══════════════════════════════════════ */
+    function updateStreak() {
+      let todayStr = new Date().toISOString().slice(0,10);
+      let last = localStorage.getItem("lastSave");
+      if (last !== todayStr) {
+        streak++;
+        localStorage.setItem("streak", streak);
+        localStorage.setItem("lastSave", todayStr);
+        elStreakBox.innerText = streak;
+      }
+    }
+
+    /* ══════════════════════════════════════
+       SYNC
+    ══════════════════════════════════════ */
+    window.addEventListener("online", syncPending);
+
+    async function syncPending() {
+      if (!navigator.onLine || !pending.length) return;
+      let sent = 0;
+      while (pending.length) {
+        try {
+          await fetch(API_URL, {
+            method:"POST",
+            headers:{ "Content-Type":"text/plain;charset=utf-8" },
+            body: JSON.stringify(pending[0])
+          });
+          pending.shift(); sent++;
+        } catch(e) { break; }
+      }
+      localStorage.setItem(keyFor("pendingQueue"), JSON.stringify(pending));
+      elPendingCount.innerText = pending.length;
+      if (sent) { toast("✔ " + sent + " sincronizados"); load(); }
+    }
+
+    /* ══════════════════════════════════════
+       BORRAR
+    ══════════════════════════════════════ */
+    async function borrar(id) {
+      if (!confirm("Eliminar movimiento")) return;
+      data = data.filter(x => String(x.ID) !== String(id));
+      localStorage.setItem(keyFor("dataCache"), JSON.stringify(data));
+      render();
+      renderCrossCard();
+      try {
+        await fetch(API_URL, {
+          method:"POST",
+          headers:{ "Content-Type":"text/plain;charset=utf-8" },
+          body: JSON.stringify({ action:"delete", ID:id })
+        });
+        toast("Eliminado");
+      } catch(e) {}
+    }
+
+    /* ══════════════════════════════════════
+       METAS
+    ══════════════════════════════════════ */
+    function addGoal() {
+      let n = elGoalName.value.trim();
+      let v = Number(elGoalValue.value);
+      if (!n || v <= 0) { toast("Completa la meta"); return; }
+      goals.push({ nombre:n, valor:v });
+      localStorage.setItem(keyFor("goals"), JSON.stringify(goals));
+      elGoalName.value = elGoalValue.value = "";
+      render();
+      toast("🎯 Meta guardada");
+    }
+
+    function delGoal(i) {
+      goals.splice(i,1);
+      localStorage.setItem(keyFor("goals"), JSON.stringify(goals));
+      render();
+    }
+
+    /* ══════════════════════════════════════
+       RENDER PRINCIPAL
+    ══════════════════════════════════════ */
+    function render() {
+      elLista.innerHTML = "";
+      let ing=0, gas=0, ah=0, cats={};
+      let sorted  = [...data].sort((a,b) => new Date(b.Fecha)-new Date(a.Fecha));
+      let lastDay = "";
+
+      sorted.forEach(x => {
+        let m = Number(x.Monto) || 0;
+        if (x.Tipo==="Ingreso")    ing += m;
+        else if (x.Tipo==="Gasto") gas += m;
+        let catStr = String(x.Categoría||"");
+        if (catStr.includes("Ahorro") || catStr.includes("Reinversión")) ah += m;
+        if (x.Tipo==="Gasto") cats[x.Categoría] = (cats[x.Categoría]||0) + m;
+
+        if (x.Fecha !== lastDay) {
+          elLista.innerHTML += `<div class="timeline-day">${labelDay(x.Fecha)}</div>`;
+          lastDay = x.Fecha;
+        }
+
+        let claseItem = x.Tipo==="Ingreso" ? "ingreso"
+          : x.Tipo==="Transferencia" ? "transferencia"
+          : x.Tipo==="TraspasoSalida"||x.Tipo==="TraspasoEntrada" ? "traspaso"
+          : "gasto";
+
+        let cuentaLabel = "";
+        if (x.Tipo === "Transferencia") {
+          let ori  = cuentas.find(c => c.id===x.CuentaOrigen);
+          let dest = cuentas.find(c => c.id===x.CuentaDestino);
+          cuentaLabel = `<span class="badge">🔄 ${ori?ori.icon+" "+ori.nombre:x.CuentaOrigen} → ${dest?dest.icon+" "+dest.nombre:x.CuentaDestino}</span>`;
+        } else if (x.Tipo==="TraspasoSalida" || x.Tipo==="TraspasoEntrada") {
+          let c = cuentas.find(c => c.id===x.Cuenta);
+          let signo = x.Tipo==="TraspasoEntrada" ? "📥" : "📤";
+          cuentaLabel = `<span class="badge cross-badge">${signo} ${c?c.icon+" "+c.nombre:x.Cuenta||""}</span>`;
+        } else if (x.Cuenta) {
+          let c = cuentas.find(c => c.id===x.Cuenta);
+          if (c) cuentaLabel = `<span class="badge">${c.icon} ${c.nombre}</span>`;
+        }
+
+        elLista.innerHTML += `
+          <div class="item ${claseItem}">
+            <div>${x.Categoría} - ${x.Descripción}${cuentaLabel}</div>
+            <div class="price">${x.Tipo==="TraspasoSalida" ? "-" : x.Tipo==="TraspasoEntrada" ? "+" : ""}${money(m)}</div>
+            <button class="small-btn" onclick="borrar('${x.ID}')">🗑️</button>
+          </div>`;
+      });
+
+      if (!sorted.length) elLista.innerHTML = `<div class="alert mid">No hay movimientos este mes.</div>`;
+
+      let saldos     = calcSaldosCuentas();
+      let saldoTotal = Object.values(saldos).reduce((a,b)=>a+b,0);
+      elSaldoTop.innerText = money(saldoTotal);
+
+      renderCuentas(saldos);
+      renderCockpit(ing, gas, ah);
+      renderCoach(ing, gas, cats);
+      renderGoals(ah);
+      if ($("tab-dashboard").classList.contains("active")) charts(cats, ing, gas, saldos);
+      renderFavorites();
+    }
+
+    /* ══════════════════════════════════════
+       RENDER CUENTAS
+    ══════════════════════════════════════ */
+    function renderCuentas(saldos) {
+      elCuentasResumen.innerHTML = elDistBar.innerHTML = elDistLegend.innerHTML = "";
+      let totalPos = cuentas.reduce((a,c) => a+Math.max(saldos[c.id]||0,0),0) || 1;
+
+      cuentas.forEach((c,i) => {
+        let s = saldos[c.id]||0, cls = s>=0?"positive":"negative";
+        let color = ACC_COLORS[i%ACC_COLORS.length];
+        elCuentasResumen.innerHTML += `
+          <div class="cuenta-card">
+            <div class="cuenta-left">
+              <div class="cuenta-icon">${c.icon}</div>
+              <div class="cuenta-name">${c.nombre}</div>
+            </div>
+            <div class="cuenta-saldo ${cls}">${money(s)}</div>
+          </div>`;
+        let pct = Math.max(s,0)/totalPos*100;
+        elDistBar.innerHTML    += `<div class="dist-seg" style="width:${pct}%;background:${color}"></div>`;
+        elDistLegend.innerHTML += `<div class="dist-item"><div class="dist-dot" style="background:${color}"></div>${c.icon} ${c.nombre}</div>`;
+      });
+    }
+
+    /* ══════════════════════════════════════
+       RENDER FAVORITOS
+    ══════════════════════════════════════ */
+    function renderFavorites() {
+      let map = {};
+      data.forEach(x => {
+        if (x.Tipo==="Transferencia"||x.Tipo==="TraspasoSalida"||x.Tipo==="TraspasoEntrada") return;
+        let key = x.Categoría+"|"+x.Descripción+"|"+x.Monto+"|"+(x.Cuenta||"");
+        if (!map[key]) map[key] = { cat:x.Categoría, des:x.Descripción, monto:x.Monto, cuenta:x.Cuenta, count:0 };
+        map[key].count++;
+      });
+      let top = Object.values(map).sort((a,b)=>b.count-a.count).slice(0,4);
+      elFavList.innerHTML = "";
+      if (!top.length) { elFavList.innerHTML=`<div class="small">Aún sin favoritos</div>`; return; }
+      top.forEach(f => {
+        elFavList.innerHTML += `
+          <button class="secondary" onclick="usarFavorito('${f.cat}','${f.des}',${f.monto},'${f.cuenta||""}')">
+            ${f.cat}<br><small>${f.des}</small><br><small>${money(f.monto)}</small>
+          </button>`;
+      });
+    }
+
+    /* ══════════════════════════════════════
+       COCKPIT
+    ══════════════════════════════════════ */
+    function renderCockpit(ing, gas, ah) {
+      let todayStr  = new Date().toISOString().slice(0,10);
+      let hoyGastado = data.filter(x=>x.Fecha===todayStr&&x.Tipo==="Gasto").reduce((a,b)=>a+Number(b.Monto||0),0);
+      let disponible = Math.max((ing-gas)/7,0);
+      let isNeg = contexto === "negocio";
+
+      let traspasoSalidas  = data.filter(x=>x.Tipo==="TraspasoSalida").reduce((a,x)=>a+Number(x.Monto||0),0);
+      let traspasoEntradas = data.filter(x=>x.Tipo==="TraspasoEntrada").reduce((a,x)=>a+Number(x.Monto||0),0);
+      let traspasoNeto     = traspasoEntradas - traspasoSalidas;
+
+      elCockpit.innerHTML = `
+        <div class="grid2">
+          <div class="kpi"><span>Hoy gastado</span><strong>${money(hoyGastado)}</strong></div>
+          <div class="kpi"><span>${isNeg?"Flujo diario est.":"Puedes gastar hoy"}</span><strong>${money(disponible)}</strong></div>
+          <div class="kpi"><span>${isNeg?"Reinversión":"Ahorro real"}</span><strong>${money(ah)}</strong></div>
+          <div class="kpi"><span>${isNeg?"Utilidad neta":"Balance neto"}</span><strong>${money(ing-gas)}</strong></div>
+        </div>
+        ${traspasoNeto!==0?`
+        <div class="alert info" style="margin-top:8px">
+          🔀 Traspasos este mes: <b>${traspasoNeto>0?"+":""}${money(traspasoNeto)}</b> neto
+        </div>`:""}`;
+    }
+
+    /* ══════════════════════════════════════
+       COACH
+    ══════════════════════════════════════ */
+    function renderCoach(ing, gas, cats) {
+      let txt = "", balance = ing - gas;
+      let isNeg = contexto === "negocio";
+
+      if (balance > 0)        txt += `<div class="alert good">🟢 ${isNeg?"Negocio rentable. Utilidad positiva este mes.":"Salud financiera positiva. Vas cerrando con superávit."}</div>`;
+      else if (balance === 0) txt += `<div class="alert mid">🟡 Vas en punto de equilibrio. ${isNeg?"Revisa costos para mejorar margen.":"Controla próximos gastos."}</div>`;
+      else                    txt += `<div class="alert bad">🔴 ${isNeg?"Gastos superan ingresos. Revisa costos urgente.":"Gastas más de lo que ingresas actualmente."}</div>`;
+
+      let topEntry = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+      if (topEntry) {
+        let porc = ((topEntry[1]/Math.max(gas,1))*100).toFixed(0);
+        txt += `<div class="alert bad">⚠️ Mayor ${isNeg?"costo":"fuga"}: <b>${topEntry[0]}</b> (${porc}% de ${isNeg?"costos":"gastos"})</div>`;
+      }
+
+      let hoy=new Date(), dia=hoy.getDate();
+      if (dia > 0) {
+        let prom=gas/dia, dias=new Date(hoy.getFullYear(),hoy.getMonth()+1,0).getDate();
+        let proy=Math.round(prom*dias), sproj=ing-proy;
+        if (sproj > 0) txt += `<div class="alert good">📈 ${isNeg?"Utilidad proyectada:":"Si sigues así cerrarás con"} <b>${money(sproj)}</b></div>`;
+        else            txt += `<div class="alert bad">📉 ${isNeg?"Cierre proyectado en pérdida:":"Al ritmo actual cerrarías en"} <b>${money(sproj)}</b></div>`;
+      }
+
+      if (topEntry) txt += `<div class="alert mid">💡 Bajando <b>${topEntry[0]}</b> un 15% ${isNeg?"mejorarías margen en":"ahorrarías"} <b>${money(Math.round(topEntry[1]*.15))}</b></div>`;
+      txt += `<div class="alert good">🔥 Racha activa: <b>${streak}</b> días registrando movimientos</div>`;
+
+      if (isNeg && ing > 0) {
+        let margen = ((balance/ing)*100).toFixed(1);
+        let margenColor = balance>0?"var(--ok)":"var(--bad)";
+        txt += `<div class="alert mid">📊 Margen neto: <b style="color:${margenColor}">${margen}%</b></div>`;
+      }
+
+      if (!isNeg && gas < ing*.70 && ing > 0)
+        txt += `<div class="alert good">🚀 Excelente control: gastos bajo el 70% de tus ingresos.</div>`;
+
+      elCoach.innerHTML = txt;
+    }
+
+    /* ══════════════════════════════════════
+       METAS
+    ══════════════════════════════════════ */
+    function renderGoals(ah) {
+      elGoalList.innerHTML = "";
+      if (!goals.length) { elGoalList.innerHTML=`<div class="alert mid">No tienes metas aún.</div>`; return; }
+      goals.forEach((g,i) => {
+        let p = Math.min((ah/g.valor)*100,100), faltan = Math.max(g.valor-ah,0);
+        elGoalList.innerHTML += `
+          <div class="item">
+            <div style="font-weight:800">${g.nombre}</div>
+            <div class="small">${money(ah)} / ${money(g.valor)}</div>
+            <div class="progress"><div class="bar" style="width:${p}%"></div></div>
+            <div class="small" style="margin-top:8px">Faltan ${money(faltan)}</div>
+            <button class="small-btn" onclick="delGoal(${i})">🗑️</button>
+          </div>`;
+      });
+    }
+
+    /* ══════════════════════════════════════
+       GRÁFICOS
+    ══════════════════════════════════════ */
+    function charts(cats, ing, gas, saldos) {
+      [c1,c2,c3,c4,c5,c6].forEach(c => { if(c) c.destroy(); });
+
+      let accLabels = cuentas.map(c => c.icon+" "+c.nombre);
+      let accValues = cuentas.map(c => saldos[c.id]||0);
+      let accColors = cuentas.map((_,i) => ACC_COLORS[i%ACC_COLORS.length]);
+
+      c6 = new Chart($("chart6"),{ type:"bar",
+        data:{ labels:accLabels, datasets:[{ data:accValues, backgroundColor:accColors }] },
+        options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:false } } }
+      });
+
+      if (Object.keys(cats).length) {
+        c1 = new Chart($("chart1"),{ type:"doughnut",
+          data:{ labels:Object.keys(cats), datasets:[{ data:Object.values(cats) }] }
+        });
+      }
+
+      c2 = new Chart($("chart2"),{ type:"bar",
+        data:{ labels:["Ingresos", contexto==="negocio"?"Costos":"Gastos"],
+               datasets:[{ data:[ing,gas], backgroundColor:["#22c55e","#ef4444"] }] }
+      });
+
+      let dias={}, saldo=0;
+      [...data].sort((a,b)=>new Date(a.Fecha)-new Date(b.Fecha)).forEach(x=>{
+        let m=Number(x.Monto)||0;
+        if (x.Tipo==="Ingreso") saldo+=m;
+        else if (x.Tipo==="Gasto") saldo-=m;
+        else if (x.Tipo==="TraspasoEntrada") saldo+=m;
+        else if (x.Tipo==="TraspasoSalida") saldo-=m;
+        dias[x.Fecha]=saldo;
+      });
+      c3 = new Chart($("chart3"),{ type:"line",
+        data:{ labels:Object.keys(dias), datasets:[{ data:Object.values(dias), fill:false, tension:0.3, borderColor:"#2563eb" }] }
+      });
+
+      let week=[0,0,0,0,0,0,0];
+      data.forEach(x=>{ if(x.Tipo==="Gasto"){ let d=new Date(x.Fecha+"T00:00:00"); week[d.getDay()]+=Number(x.Monto)||0; } });
+      c4 = new Chart($("chart4"),{ type:"bar",
+        data:{ labels:["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"], datasets:[{ data:week }] }
+      });
+
+      let fm={};
+      data.forEach(x=>{ if(x.Tipo==="Gasto") fm[x.Descripción]=(fm[x.Descripción]||0)+(Number(x.Monto)||0); });
+      let tf=Object.entries(fm).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      c5 = new Chart($("chart5"),{ type:"bar",
+        data:{ labels:tf.map(x=>x[0]), datasets:[{ data:tf.map(x=>x[1]) }] },
+        options:{ indexAxis:"y" }
+      });
+    }
+
+    /* ══════════════════════════════════════
+       INIT
+    ══════════════════════════════════════ */
+    elFecha.valueAsDate = new Date();
+    elToday.innerText   = new Date().toLocaleDateString("es-CO",{ weekday:"long", day:"numeric", month:"long" });
+    elStreakBox.innerText = streak;
+
+    cargarCuentasDeContexto();
+    cargarCategoriasDeContexto();
+    cargarDatosDeContexto();
+    poblarSelectsCuentas();
+    poblarSelectCategoria("ingreso");
+    aplicarEstiloContexto();
+    actualizarLabelsContexto();
+    poblarSelectsTraspaso();
+    render();
+    renderCrossCard();
+    load();
+    syncPending();
+
+    document.getElementById("traspasoDireccion").addEventListener("change", poblarSelectsTraspaso);
+
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js")
+        .then(() => console.log("SW registrado"))
+        .catch(console.error);
+    }
+  </script>
+
+</body>
+</html>
